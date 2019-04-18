@@ -1,5 +1,5 @@
-#ifndef RING_BUFFER_H__
-#define RING_BUFFER_H__
+#ifndef RING_BUFFER_H_INCLUDED
+#define RING_BUFFER_H_INCLUDED
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -29,8 +29,8 @@ struct ring_buffer {
 
 /**
  *
- * @param self
- * @return
+ * @param self The reference of a @ref ring_buffer object.
+ * @return true if the buffer is full otherwise false.
  */
 static inline bool ring_buffer_is_full(struct ring_buffer *self)
 {
@@ -39,8 +39,8 @@ static inline bool ring_buffer_is_full(struct ring_buffer *self)
 
 /**
  *
- * @param self
- * @return
+ * @param self The reference of a @ref ring_buffer object.
+ * @return true if the buffer is empty otherwise false.
  */
 static inline bool ring_buffer_is_empty(struct ring_buffer *self)
 {
@@ -49,8 +49,8 @@ static inline bool ring_buffer_is_empty(struct ring_buffer *self)
 
 /**
  *
- * @param self
- * @param value
+ * @param self The reference of a @ref ring_buffer object.
+ * @param value The value will be push to the buffer.
  * @return
  */
 static inline bool ring_buffer_push(struct ring_buffer *self, int16_t value)
@@ -66,8 +66,8 @@ static inline bool ring_buffer_push(struct ring_buffer *self, int16_t value)
 
 /**
  *
- * @param self
- * @param value
+ * @param self The reference of a @ref ring_buffer object.
+ * @param value The value will be push to the buffer.
  */
 static inline void ring_buffer_force_push(struct ring_buffer *self, int16_t value)
 {
@@ -80,8 +80,8 @@ static inline void ring_buffer_force_push(struct ring_buffer *self, int16_t valu
 
 /**
  *
- * @param self
- * @param data
+ * @param self The reference of a @ref ring_buffer object.
+ * @param data The place used to stored popped out data.
  * @return
  */
 static inline bool ring_buffer_pop(struct ring_buffer *self, int16_t *data)
@@ -95,4 +95,4 @@ static inline bool ring_buffer_pop(struct ring_buffer *self, int16_t *data)
 	return ret;
 }
 
-#endif	/*RING_BUFFER_H__*/
+#endif	/*RING_BUFFER_H_INCLUDED*/

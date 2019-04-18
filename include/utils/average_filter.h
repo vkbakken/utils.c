@@ -1,5 +1,5 @@
-#ifndef AVERAGE_FILTER_H__
-#define AVERAGE_FILTER_H__
+#ifndef AVERAGE_FILTER_H_INCLUDED
+#define AVERAGE_FILTER_H_INCLUDED
 
 #include "utils/ring_buffer.h"
 
@@ -19,9 +19,9 @@ struct moving_average {
 };
 
 /**
- *
- * @param self
- * @param value
+ * The API used for processing moving average after adding the first element into the window buffer.
+ * @param self The reference of a @ref moving_average object.
+ * @param value The value will be add to the window buffer.
  * @return
  */
 static inline int16_t moving_avg(struct moving_average *self, int16_t value)
@@ -43,9 +43,9 @@ static inline int16_t moving_avg(struct moving_average *self, int16_t value)
 }
 
 /**
- *
- * @param self
- * @param value
+ * The API used for processing moving average after the window buffer has been filled.
+ * @param self The reference of a @ref moving_average object.
+ * @param value The value will be add to the window buffer.
  * @return
  */
 static inline int16_t moving_avg1(struct moving_average *self, int16_t value)
@@ -65,4 +65,4 @@ static inline int16_t moving_avg1(struct moving_average *self, int16_t value)
 	return current_average;
 }
 
-#endif	/*AVERAGE_FILTER_H__*/
+#endif /*AVERAGE_FILTER_H_INCLUDED*/
