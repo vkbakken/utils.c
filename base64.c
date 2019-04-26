@@ -102,7 +102,7 @@ int base64_decode(const unsigned char *src, size_t len, unsigned char *dst)
 				else if (pad == 2)
 					pos -= 2;
 				else {
-					return NULL;
+					return INPUT_LENGTH_INVALID;
 				}
 				break;
 			}

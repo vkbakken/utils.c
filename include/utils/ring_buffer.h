@@ -8,11 +8,13 @@
 	static int16_t _name##_mempool[_size];            \
 	static struct ring_buffer _name##_ring_buffer = { \
 		.buffer = _name##_mempool,                    \
-		.buffer_size = _size}
+		.buffer_size = sizeof(_name##_mempool) / sizeof(int16_t)}
 
 #define RING_BUFFER_IS_FULL(_name) ring_buffer_is_full(&_name##_ring_buffer)
 
 #define RING_BUFFER_IS_EMPTY(_name) ring_buffer_is_empty(&_name##_ring_buffer)
+
+#define RING_BUFFER_COUNT(_name) ring_buffer_count(&_name##_ring_buffer)
 
 #define RING_BUFFER_PUSH(_name, _val) ring_buffer_push(&_name##_ring_buffer, _val)
 
@@ -45,6 +47,26 @@ static inline bool ring_buffer_is_full(struct ring_buffer *self)
 static inline bool ring_buffer_is_empty(struct ring_buffer *self)
 {
 	return self->index_head == self->index_tail;
+}
+
+/**
+ *
+ * @param self The reference of a @ref ring_buffer object.
+ * @return true if the buffer is empty otherwise false.
+ */
+static inline uint8_t ring_buffer_count(struct ring_buffer *self)
+{
+	uint8_t count = self->buffer_size - 1;
+
+	if (!ring_buffer_is_full(self)) {
+		if (self->index_head >= self->index_tail) {
+			count = (self->index_head - self->index_tail);
+		} else {
+			count = (self->buffer_size + self->index_head - self->index_tail);
+		}
+	}
+
+	return count;
 }
 
 /**
@@ -95,4 +117,4 @@ static inline bool ring_buffer_pop(struct ring_buffer *self, int16_t *data)
 	return ret;
 }
 
-#endif	/*RING_BUFFER_H_INCLUDED*/
+#endif /*RING_BUFFER_H_INCLUDED*/
