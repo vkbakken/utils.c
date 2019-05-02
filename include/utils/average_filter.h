@@ -1,10 +1,11 @@
 #ifndef AVERAGE_FILTER_H_INCLUDED
 #define AVERAGE_FILTER_H_INCLUDED
 
+#include <assert.h>
 #include "utils/ring_buffer.h"
 
 #define MOVING_AVERAGE_DECLARE(_name, _window_size)         \
-	RING_BUFFER_DECLARE(_name, _window_size + 1);           \
+	RING_BUFFER_DECLARE(int16_t, _name, _window_size + 1); \
 	static struct moving_average _name##_moving_average = { \
 		.ring_buffer_p = &_name##_ring_buffer,              \
 		.window_size = _window_size,                        \
@@ -28,7 +29,9 @@ static inline int16_t moving_avg(struct moving_average *self, int16_t value)
 {
 	int16_t current_average, remove_sample;
 
-	if (ring_buffer_push(self->ring_buffer_p, value)) {
+    assert(NULL != self);
+
+	if (ring_buffer_push(self->ring_buffer_p, &value)) {
 		self->current_sum += value;
 		current_average = self->current_sum / self->window_size;
 
@@ -52,7 +55,9 @@ static inline int16_t moving_avg1(struct moving_average *self, int16_t value)
 {
 	int16_t current_average, remove_sample;
 
-	if (ring_buffer_push(self->ring_buffer_p, value)) {
+    assert(NULL != self);
+
+	if (ring_buffer_push(self->ring_buffer_p, &value)) {
 		self->current_sum += value;
 		if (ring_buffer_is_full(self->ring_buffer_p)) {
 			current_average = self->current_sum / self->window_size;

@@ -1,14 +1,18 @@
 #ifndef RING_BUFFER_H_INCLUDED
 #define RING_BUFFER_H_INCLUDED
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
-#define RING_BUFFER_DECLARE(_name, _size)             \
-	static int16_t _name##_mempool[_size];            \
+#define RING_BUFFER_DECLARE(_type, _name, _size)      \
+	static _type _name##_mempool[(_size)];            \
 	static struct ring_buffer _name##_ring_buffer = { \
 		.buffer = _name##_mempool,                    \
-		.buffer_size = sizeof(_name##_mempool) / sizeof(int16_t)}
+		.buffer_size = (_size),                       \
+		.element_size = sizeof(_type)}
 
 #define RING_BUFFER_IS_FULL(_name) ring_buffer_is_full(&_name##_ring_buffer)
 
@@ -16,17 +20,18 @@
 
 #define RING_BUFFER_COUNT(_name) ring_buffer_count(&_name##_ring_buffer)
 
-#define RING_BUFFER_PUSH(_name, _val) ring_buffer_push(&_name##_ring_buffer, _val)
+#define RING_BUFFER_PUSH(_name, _input) ring_buffer_push(&_name##_ring_buffer, _input)
 
-#define RING_BUFFER_POP(_name, _data) ring_buffer_pop(&_name##_ring_buffer, _data)
+#define RING_BUFFER_POP(_name, _output) ring_buffer_pop(&_name##_ring_buffer, _output)
 
-#define RING_BUFFER_FORCE_PUSH(_name, _val) ring_buffer_force_push(&_name##_ring_buffer, _val)
+#define RING_BUFFER_FORCE_PUSH(_name, _input) ring_buffer_force_push(&_name##_ring_buffer, _input)
 
 struct ring_buffer {
-	int16_t *buffer;
-	uint8_t index_head;
-	uint8_t index_tail;
-	uint8_t buffer_size;
+	void *buffer;
+	size_t index_head;
+	size_t index_tail;
+	size_t buffer_size;
+	size_t element_size;
 };
 
 /**
@@ -36,6 +41,8 @@ struct ring_buffer {
  */
 static inline bool ring_buffer_is_full(struct ring_buffer *self)
 {
+	assert(NULL != self);
+
 	return self->index_tail == (self->index_head + 1) % self->buffer_size;
 }
 
@@ -46,6 +53,8 @@ static inline bool ring_buffer_is_full(struct ring_buffer *self)
  */
 static inline bool ring_buffer_is_empty(struct ring_buffer *self)
 {
+	assert(NULL != self);
+
 	return self->index_head == self->index_tail;
 }
 
@@ -57,6 +66,8 @@ static inline bool ring_buffer_is_empty(struct ring_buffer *self)
 static inline uint8_t ring_buffer_count(struct ring_buffer *self)
 {
 	uint8_t count = self->buffer_size - 1;
+
+	assert(NULL != self);
 
 	if (!ring_buffer_is_full(self)) {
 		if (self->index_head >= self->index_tail) {
@@ -72,14 +83,18 @@ static inline uint8_t ring_buffer_count(struct ring_buffer *self)
 /**
  *
  * @param self The reference of a @ref ring_buffer object.
- * @param value The value will be push to the buffer.
+ * @param input The data will be pushed to the buffer.
  * @return
  */
-static inline bool ring_buffer_push(struct ring_buffer *self, int16_t value)
+static inline bool ring_buffer_push(struct ring_buffer *self, void *input)
 {
 	bool ret = false;
+
+	assert(NULL != self && NULL != input);
+
 	if (!ring_buffer_is_full(self)) {
-		self->buffer[self->index_head] = value;
+		memcpy(self->buffer + self->index_head * self->element_size,
+			input, self->element_size);
 		self->index_head = (self->index_head + 1) % self->buffer_size;
 		ret = true;
 	}
@@ -89,11 +104,14 @@ static inline bool ring_buffer_push(struct ring_buffer *self, int16_t value)
 /**
  *
  * @param self The reference of a @ref ring_buffer object.
- * @param value The value will be push to the buffer.
+ * @param input The data will be pushed to the buffer.
  */
-static inline void ring_buffer_force_push(struct ring_buffer *self, int16_t value)
+static inline void ring_buffer_force_push(struct ring_buffer *self, void *input)
 {
-	self->buffer[self->index_head] = value;
+	assert(NULL != self && NULL != input);
+
+	memcpy(self->buffer + self->index_head * self->element_size,
+		input, self->element_size);
 	if (ring_buffer_is_full(self)) {
 		self->index_tail = (self->index_tail + 1) % self->buffer_size;
 	}
@@ -103,14 +121,18 @@ static inline void ring_buffer_force_push(struct ring_buffer *self, int16_t valu
 /**
  *
  * @param self The reference of a @ref ring_buffer object.
- * @param data The place used to stored popped out data.
+ * @param output The place used to stored popped out data.
  * @return
  */
-static inline bool ring_buffer_pop(struct ring_buffer *self, int16_t *data)
+static inline bool ring_buffer_pop(struct ring_buffer *self, void *output)
 {
 	bool ret = false;
+
+	assert(NULL != self && NULL != output);
+
 	if (!ring_buffer_is_empty(self)) {
-		*data = self->buffer[self->index_tail];
+		memcpy(output, self->buffer + self->index_tail * self->element_size,
+			self->element_size);
 		self->index_tail = (self->index_tail + 1) % self->buffer_size;
 		ret = true;
 	}
