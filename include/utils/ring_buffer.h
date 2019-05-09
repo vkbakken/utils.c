@@ -1,11 +1,11 @@
 #ifndef RING_BUFFER_H_INCLUDED
 #define RING_BUFFER_H_INCLUDED
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "utils/os_assert.h"
 
 #define RING_BUFFER_DECLARE(_type, _name, _size)      \
 	static _type _name##_mempool[(_size)];            \
@@ -41,7 +41,7 @@ struct ring_buffer {
  */
 static inline bool ring_buffer_is_full(struct ring_buffer *self)
 {
-	assert(NULL != self);
+	__ASSERT(NULL != self);
 
 	return self->index_tail == (self->index_head + 1) % self->buffer_size;
 }
@@ -53,7 +53,7 @@ static inline bool ring_buffer_is_full(struct ring_buffer *self)
  */
 static inline bool ring_buffer_is_empty(struct ring_buffer *self)
 {
-	assert(NULL != self);
+	__ASSERT(NULL != self);
 
 	return self->index_head == self->index_tail;
 }
@@ -67,7 +67,7 @@ static inline uint8_t ring_buffer_count(struct ring_buffer *self)
 {
 	uint8_t count = self->buffer_size - 1;
 
-	assert(NULL != self);
+	__ASSERT(NULL != self);
 
 	if (!ring_buffer_is_full(self)) {
 		if (self->index_head >= self->index_tail) {
@@ -90,7 +90,7 @@ static inline bool ring_buffer_push(struct ring_buffer *self, void *input)
 {
 	bool ret = false;
 
-	assert(NULL != self && NULL != input);
+	__ASSERT(NULL != self && NULL != input);
 
 	if (!ring_buffer_is_full(self)) {
 		memcpy(self->buffer + self->index_head * self->element_size,
@@ -108,7 +108,7 @@ static inline bool ring_buffer_push(struct ring_buffer *self, void *input)
  */
 static inline void ring_buffer_force_push(struct ring_buffer *self, void *input)
 {
-	assert(NULL != self && NULL != input);
+	__ASSERT(NULL != self && NULL != input);
 
 	memcpy(self->buffer + self->index_head * self->element_size,
 		input, self->element_size);
@@ -128,7 +128,7 @@ static inline bool ring_buffer_pop(struct ring_buffer *self, void *output)
 {
 	bool ret = false;
 
-	assert(NULL != self && NULL != output);
+	__ASSERT(NULL != self && NULL != output);
 
 	if (!ring_buffer_is_empty(self)) {
 		memcpy(output, self->buffer + self->index_tail * self->element_size,

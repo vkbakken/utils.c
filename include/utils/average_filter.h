@@ -1,7 +1,7 @@
 #ifndef AVERAGE_FILTER_H_INCLUDED
 #define AVERAGE_FILTER_H_INCLUDED
 
-#include <assert.h>
+#include "utils/os_assert.h"
 #include "utils/ring_buffer.h"
 
 #define MOVING_AVERAGE_DECLARE(_name, _window_size)         \
@@ -29,7 +29,7 @@ static inline int16_t moving_avg(struct moving_average *self, int16_t value)
 {
 	int16_t current_average, remove_sample;
 
-    assert(NULL != self);
+    __ASSERT(NULL != self);
 
 	if (ring_buffer_push(self->ring_buffer_p, &value)) {
 		self->current_sum += value;
@@ -55,7 +55,7 @@ static inline int16_t moving_avg1(struct moving_average *self, int16_t value)
 {
 	int16_t current_average, remove_sample;
 
-    assert(NULL != self);
+    __ASSERT(NULL != self);
 
 	if (ring_buffer_push(self->ring_buffer_p, &value)) {
 		self->current_sum += value;
